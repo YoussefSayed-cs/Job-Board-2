@@ -1,0 +1,64 @@
+<?php
+
+use App\Http\Controllers\applicationController;
+use App\Http\Controllers\categoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CompanyController;
+
+
+use App\Http\Controllers\JobVacancyController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\Group;
+
+
+Route::middleware(['auth','role:admin,company-owner' ])->group(function () {
+
+    Route::get('/' , [DashboardController::class, 'index'])->name('dashboard');
+
+    
+    // Job Applications
+    Route::resource('job-applications', applicationController::class);
+    Route::put('/job-applications/{id}/restore', [applicationController::class, 'restore'])->name('job-applications.restore');
+
+    // Job Vacancies   
+    Route::resource('job-vacancies', JobVacancyController::class);
+    Route::put('/job-vacancies/{id}/restore', [JobVacancyController::class, 'restore'])->name('job-vacancies.restore');  
+
+    
+   
+});
+
+// Company Routes
+Route::middleware(['auth','role:company-owner'])->group(function(){
+
+    Route::get('/my-company', [CompanyController::class, 'show'])
+        ->name('my-company.show');
+
+    Route::get('/my-company/edit', [CompanyController::class, 'edit'])
+        ->name('my-company.edit');
+
+    Route::put('/my-company', [CompanyController::class, 'update'])
+        ->name('my-company.update');
+});
+
+// Admin Routes
+Route::middleware(['auth','role:admin'])->group(function(){
+    // Users
+    Route::resource('users', UserController::class);
+    Route::put('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+
+    // Companies
+    Route::resource('companies', CompanyController::class);
+    Route::put('/companies/{id}/restore', [CompanyController::class, 'restore'])->name('companies.restore');
+
+
+    // Job Categories
+    Route::resource('job-categories', categoryController::class);
+    Route::put('/job-categories/{id}/restore', [categoryController::class, 'restore'])->name('job-categories.restore');
+
+});
+
+
+require __DIR__.'/auth.php';
