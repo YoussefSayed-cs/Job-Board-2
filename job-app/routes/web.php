@@ -12,7 +12,7 @@ Route::get('/', function () {
 });
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth' , 'role:job-seeker'])->group(function () {
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 
     Route::get('/job-applications', [JobApplicationsController::class,'index'])->name('job-applications.index');

@@ -3,7 +3,7 @@
     <div class="flex items-center px-6 border-b border-gray-200 py-4">
         <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
             <x-application-logo class="h-6 w-auto fill-current text-gray-800" />
-            <span class="text-lg font-semibold text-gray-800"> {{ __('Shaghalni') }}</span>
+            <span class="text-lg font-semibold text-gray-800">{{ __('Shaghalni') }}</span>
         </a>
     </div>
 
@@ -13,43 +13,41 @@
             {{ __('Dashboard') }}
         </x-nav-link>
 
+        @if (auth()->user()->role == 'admin')
+            <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.*')">
+                {{ __('Companies') }}
+            </x-nav-link>
+        @endif
 
-    @if (auth()->user()->role == 'admin')
-         <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.*')">
-            {{ __('Companies') }}
-        </x-nav-link>
-    @endif
+        @if (auth()->user()->role == 'company-owner')
+            <x-nav-link :href="route('my-company.show')" :active="request()->routeIs('my-company.*')">
+                My Company
+            </x-nav-link>
+        @endif
 
-     @if (auth()->user()->role == 'company-owner')
-       <x-nav-link :href="route('my-company.show')" :active="request()->routeIs('my-company.*')">
-            My Company
-       </x-nav-link>
-
-           
-     @endif
-
-       
-        <x-nav-link :href="route('job-applications.index')" :active="request()->routeIs('applications.*')">
+        <!-- Applications - استخدم job-applications.* كما في ملف الروات -->
+        <x-nav-link :href="route('job-applications.index')" 
+                    :active="request()->routeIs('job-applications.*')">
             {{ __('Applications') }}
         </x-nav-link>
 
-
-     @if (auth()->user()->role == 'admin')
-        <x-nav-link :href="route('job-categories.index')" :active="request()->routeIs('categories.*')">
-            {{ __('Categories') }}
-        </x-nav-link>
-     @endif
-        
+        @if (auth()->user()->role == 'admin')
+            <!-- Categories - استخدم job-categories.* كما في ملف الروات -->
+            <x-nav-link :href="route('job-categories.index')" 
+                        :active="request()->routeIs('job-categories.*')">
+                {{ __('Categories') }}
+            </x-nav-link>
+        @endif
 
         <x-nav-link :href="route('job-vacancies.index')" :active="request()->routeIs('job-vacancies.*')">
             {{ __('Job Vacancies') }}
         </x-nav-link>
         
-      @if (auth()->user()->role == 'admin')
-        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-            {{ __('Users') }}
-        </x-nav-link>
-     @endif
+        @if (auth()->user()->role == 'admin')
+            <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                {{ __('Users') }}
+            </x-nav-link>
+        @endif
 
         <hr />
         <!-- Logout -->

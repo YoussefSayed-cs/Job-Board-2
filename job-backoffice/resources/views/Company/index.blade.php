@@ -10,7 +10,7 @@
 
         <x-toast-notification />
 
-        <div class="flex justify-end items-center space-x-4">
+        <div class="flex justify-end items-center space-x-4 pb-8 m-3">
             @if (request()->has('archived') && request()->input('archived') == 'true')
 
                 <!-- Active -->

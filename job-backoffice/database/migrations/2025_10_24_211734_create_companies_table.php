@@ -17,6 +17,7 @@ return new class extends Migration
            $table->string('address');
            $table->string('industry');
            $table->string('website') ->nullable();
+           $table->string('description');  
            $table->timestamps();
            $table->softDeletes();
 

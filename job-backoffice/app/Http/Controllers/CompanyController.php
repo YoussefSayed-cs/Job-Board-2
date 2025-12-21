@@ -19,6 +19,8 @@ class CompanyController extends Controller
     public $industries = [ 'Technology', 'Finance', 'Healthcare', 'Education', 'Retail'] ;
 
     
+ 
+    
     
     /**
      * Display a listing of the resource.
@@ -82,6 +84,8 @@ class CompanyController extends Controller
             'website' => $validated['website'] ?? null,
             'ownerID' => $owner->id,       
         ]);
+
+        
 
        
         return redirect()->route('companies.index')->with('success','Company created successfully');

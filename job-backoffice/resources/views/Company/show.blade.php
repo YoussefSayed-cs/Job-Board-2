@@ -11,7 +11,7 @@
         <!-- Company Card -->
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                <div>
+                <div class="flex-1">
                     <h3 class="text-2xl font-semibold mb-2">{{ $company->name }}</h3>
                     <p class="text-sm text-gray-500 mb-1"><strong>Owner:</strong> {{ $company->owner->name ?? '—' }}</p>
                     <p class="text-sm text-gray-500 mb-1"><strong>Address:</strong> {{ $company->address ?? '—' }}</p>
@@ -28,37 +28,45 @@
                     </p>
                 </div>
 
-                <div class="flex justify-end space-x-4 mb-6">
-
+                <div class="flex flex-col md:flex-row items-start md:items-center space-y-3 md:space-y-0 md:space-x-3">
                     @if (auth()->user()->role == 'company-owner')
-                     <a href="{{ route('my-company.edit') }}" 
-                     class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Edit</a>
+                        <a href="{{ route('my-company.edit') }}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                           Edit
+                        </a>
                     @else
-                     <a href="{{ route('companies.edit', ['company' => $company->id,'redirectToList' => 'false']) }}" 
-                     class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Edit</a>
+                        <a href="{{ route('companies.edit', ['company' => $company->id, 'redirectToList' => 'false']) }}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                           Edit
+                        </a>
                     @endif
                     
-                    <form action="{{ route('companies.destroy', $company->id) }}" method="POST" onsubmit="return confirm('Archive this company?');">
-                        @csrf
-                        @method('DELETE')
-                        @if (auth()->user()->role == 'admin')
-                        <a href="{{ route('companies.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Back</a>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Archive</button>
-                        @endif  
-
-                    </form>
+                    @if (auth()->user()->role == 'admin')
+                        <form action="{{ route('companies.destroy', $company->id) }}" method="POST" 
+                              onsubmit="return confirm('Archive this company?');" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                                Archive
+                            </button>
+                        </form>
+                        
+                        <a href="{{ route('companies.index') }}" 
+                           class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                           Back
+                        </a>
+                    @endif
                 </div>
             </div>
-        </div> 
+        </div>
 
-         @if(auth()->user()->role == 'admin')
+        @if(auth()->user()->role == 'admin')
         <!-- Tabs -->
-
         <div class="mb-6">
             <ul class="flex border-b">
                 <li class="-mb-px mr-1">
                     <a href="{{ route('companies.show', ['company' => $company->id, 'tab' => 'jobs']) }}"
-                       class="bg-white inline-block py-2 px-4 {{ request('tab') == 'applications' ? 'text-gray-600' : 'text-blue-600 border-b-2 border-blue-600' }}">
+                       class="bg-white inline-block py-2 px-4 {{ (request('tab') == 'jobs' || request('tab') == '') ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600' }}">
                         Jobs
                     </a>
                 </li>
@@ -71,16 +79,14 @@
             </ul>
         </div>
 
-       
-    
         <!-- Tab Content -->
         <div>
             <!-- Jobs tab -->
-            <div id="jobs" class="{{ request('tab') == 'applications' ? 'hidden' : 'block' }}">
+            <div id="jobs" class="{{ (request('tab') == 'jobs' || request('tab') == '') ? 'block' : 'hidden' }}">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-bold">Jobs Content</h3>
+                    <h3 class="text-lg font-bold">Jobs</h3>
                     <span class="text-sm text-gray-600">
-                        {{ ($company->JobVacancies ?? collect())->count() }} job(s)
+                        {{ ($company->jobVacancies ?? collect())->count() }} job(s)
                     </span>
                 </div>
 
@@ -95,7 +101,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse ($company->JobVacancies ?? [] as $job)
+                            @forelse ($company->jobVacancies ?? [] as $job)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                                         <a href="{{ route('job-vacancies.show', $job->id) }}" class="hover:underline text-blue-600">{{ $job->title }}</a>
@@ -155,8 +161,8 @@
                     </table>
                 </div>
             </div>
-            @endif
         </div> <!-- end tab content wrapper -->
+        @endif
 
     </div> <!-- end container -->
 

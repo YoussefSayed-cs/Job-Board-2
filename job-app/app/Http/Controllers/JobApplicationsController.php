@@ -7,11 +7,10 @@ use Illuminate\Http\Request;
 
 class JobApplicationsController extends Controller
 {
-       public function index()
-       {
-              $jobApplications = job_application::where('userID', auth()->id())->latest()->paginate(10);
-              return view('job-applications.index');
+    public function index()
+    {
+        $jobApplications = job_application::where('userID', auth()->id())->orderBy('created_at' , 'desc')->paginate(10);
 
-       }
-
+        return view('job-applications.index', compact('jobApplications'));
+    }
 }

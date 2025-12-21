@@ -13,7 +13,7 @@
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                 <div>
                     <h3 class="text-2xl font-semibold mb-2">{{ $vacancy->company->name }}</h3>
-                    <p class="text-sm text-gray-500 mb-1"><strong>Location:</strong> {{ $vacancy->location?? '—' }}</p>
+                    <p class="text-sm text-gray-500 mb-1"><strong>Location:</strong> {{ $vacancy->location ?? '—' }}</p>
                     <p class="text-sm text-gray-500 mb-1"><strong>Type:</strong> {{ $vacancy->type ?? '—' }}</p>
                     <p class="text-sm text-gray-500 mb-1"><strong>Salary:</strong> {{ $vacancy->salary ?? '—' }}</p>
                     <p class="text-sm text-gray-500 mb-1"><strong>Description:</strong> {{ $vacancy->description ?? '—' }}</p>
@@ -29,23 +29,32 @@
                 </div>
 
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('job-vacancies.edit', ['job_vacancy' => $vacancy->id,'redirectToList' => 'false']) }}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Edit</a>
+                    <a href="{{ route('job-vacancies.edit', ['job_vacancy' => $vacancy->id,'redirectToList' => 'false']) }}" 
+                       class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                       Edit
+                    </a>
                     
                     <form action="{{ route('job-vacancies.destroy', $vacancy->id) }}" method="POST" onsubmit="return confirm('Archive this job vacancy?');">
                         @csrf
                         @method('DELETE')
-                        <a href="{{ route('job-vacancies.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Back</a>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Archive</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                            Archive
+                        </button>
                     </form>
+                    
+                    <a href="{{ route('job-vacancies.index') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                       Back
+                    </a>
                 </div>
             </div>
         </div>                  
 
         <!-- Tabs -->
         <div class="mb-6">
-            
+            <ul class="flex border-b">
                 <li class="-mb-px mr-1">
-                    <a href="{{ route('job-vacancies.show', ['job_vacancy' => $vacancy  ->id, 'tab' => 'applications']) }}"
+                    <a href="{{ route('job-vacancies.show', ['job_vacancy' => $vacancy->id, 'tab' => 'applications']) }}"
                        class="bg-white inline-block py-2 px-4 {{ request('tab') == 'applications' || request('tab') == '' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600' }}">
                         Applications
                     </a>
@@ -55,7 +64,6 @@
 
         <!-- Tab Content -->
         <div>
-           
             <!-- Applications tab -->
             <div id="applications" class="{{ request('tab') == 'applications' || request('tab') == '' ? 'block' : 'hidden' }}">
                 <div class="mb-4 flex items-center justify-between">

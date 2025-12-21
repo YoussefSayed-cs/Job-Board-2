@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\job_application;
 use App\Models\job_vacancy;
 use App\Models\User;
-
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-
   public function index()
   {
     if (auth()->user()->role == 'admin') {
@@ -20,50 +18,51 @@ class DashboardController extends Controller
     }
 
     return view('Dashboard.index', compact(['analytics']));
-
   }
 
   private function adminDashboard()
   {
     //last 30 days active users (job seekers role)   
-    $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))->where('role', 'applicant')->count();
+    $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))
+                      ->where('role', 'applicant')
+                      ->count();
 
     //Total job vacancies (not deleted)
     $totalJob = job_vacancy::whereNull('deleted_at')->count();
 
-
     // Total applications (not deleted)
     $totalapplications = job_application::whereNull('deleted_at')->count();
 
-    $analytics = [
-      'activeUsers' => $activeUsers,
-      'totalJob' => $totalJob,
-      'totalapplications' => $totalapplications,
-    ];
-
     // Most applied jobs
     $mostAppliedJobs = job_vacancy::withCount('job_application as totalCount')
-      ->limit(5)->OrderByDesc('totalCount')->get();
-
+      ->with('company')
+      ->limit(5)
+      ->orderByDesc('totalCount')
+      ->get();
 
     //conversion rates 
     $conversionRates = job_vacancy::withCount('job_application as totalCount')
-      ->limit(5)->having('totalCount', '>', 0)->OrderByDesc('totalCount')->get()
+      ->limit(5)
+      ->orderByDesc('totalCount')
+      ->get()
       ->map(function ($job) {
-        if ($job->viewCount > 0) {
-          $job->conversionRates = round($job->totalCount / $job->views_count * 100, 2);
+        // تأكد من أن اسم العمود صحيح - غالباً 'views' أو 'view_count'
+        $views = $job->views ?? $job->view_count ?? $job->views_count ?? 0;
+        
+        if ($views > 0) {
+          $conversionRate = round(($job->totalCount / $views) * 100, 2);
         } else {
-          $job->conversionRates = 0;
+          $conversionRate = 0;
         }
-      
-
-
+        
+        // أضف الحقول التي تحتاجها للعرض
+        $job->views_count = $views;
+        $job->conversionRates = $conversionRate;
+        
         return $job;
-
       });
 
     $analytics = [
-
       'activeUsers' => $activeUsers,
       'totalJob' => $totalJob,
       'totalapplications' => $totalapplications,
@@ -76,14 +75,13 @@ class DashboardController extends Controller
 
   private function companyOwnerDashboard()
   {
-
     $company = auth()->user()->company;
 
     // filter active users by applying to jobs of the company
-    $activeUsers = User::where(column: 'last_login_at', operator: '>=', value: now()->subDays(value: 30))
-      ->where(column: 'role', operator: 'job-seeker')
-      ->whereHas(relation: 'job_application', callback: function ( $query) use ($company) {
-        $query->whereIn(column: 'jobVacancyID', values: $company->jobVacancies->pluck('id'));
+    $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))
+      ->where('role', 'job-seeker')
+      ->whereHas('job_application', function ($query) use ($company) {
+        $query->whereIn('jobVacancyID', $company->jobVacancies->pluck('id'));
       })
       ->count();
 
@@ -91,49 +89,45 @@ class DashboardController extends Controller
     $totalJobs = $company->jobVacancies->count();
 
     // total applications of the company
-    $totalApplications = job_application::whereIn(column: 'jobVacancyId', values: $company->jobVacancies->pluck('id'))->count();
+    $totalApplications = job_application::whereIn('jobVacancyId', $company->jobVacancies->pluck('id'))->count();
 
     // most applied jobs of the company
-    $mostAppliedJobs = job_vacancy::withCount(relations: 'job_application as totalCount')
-      ->whereIn(column: 'id', values: $company->jobVacancies->pluck('id'))
-      ->limit(value: 5)
-      ->orderByDesc(column: 'totalCount')
+    $mostAppliedJobs = job_vacancy::withCount('job_application as totalCount')
+      ->whereIn('id', $company->jobVacancies->pluck('id'))
+      ->limit(5)
+      ->orderByDesc('totalCount')
       ->get();
 
-
-     $conversionRates = job_vacancy::withCount('job_application as totalCount')
-     ->whereIn('id',$company->jobVacancies->pluck('id'))
-     ->having('totalcount','>',0)
-     ->limit(5)
-     ->orderByDesc('totalcount')
-     ->get()
-     ->map(function ($job) {
-        if ($job->viewCount > 0) {
-          $job->conversionRates = round($job->totalCount / $job->views_count * 100, 2);
+    $conversionRates = job_vacancy::withCount('job_application as totalCount')
+      ->whereIn('id', $company->jobVacancies->pluck('id'))
+      ->having('totalCount', '>', 0)
+      ->limit(5)
+      ->orderByDesc('totalCount')
+      ->get()
+      ->map(function ($job) {
+        // تأكد من أن اسم العمود صحيح
+        $views = $job->views ?? $job->view_count ?? $job->views_count ?? 0;
+        
+        if ($views > 0) {
+          $conversionRate = round(($job->totalCount / $views) * 100, 2);
         } else {
-          $job->conversionRates = 0;
-        };
-
+          $conversionRate = 0;
+        }
+        
+        $job->views_count = $views;
+        $job->conversionRates = $conversionRate;
+        
         return $job;
+      });
 
-   });
-
-
-
-
-    $analytics =
-      [
-        'activeUsers' => $activeUsers,
-        'totalJob' => $totalJobs,
-        'totalapplications' => $totalApplications,
-        'mostAppliedJobs' => $mostAppliedJobs,
-        'conversionRates' => $conversionRates
-
-      ];
+    $analytics = [
+      'activeUsers' => $activeUsers,
+      'totalJob' => $totalJobs,
+      'totalapplications' => $totalApplications,
+      'mostAppliedJobs' => $mostAppliedJobs,
+      'conversionRates' => $conversionRates
+    ];
 
     return $analytics;
-
   }
-
-
 }

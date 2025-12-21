@@ -55,6 +55,7 @@ class DatabaseSeeder extends Seeder
                     'address' => $company['address'],
                     'industry' => $company['industry'],
                     'website' => $company['website'],
+                    'description' => $company['description'],
                     'ownerID' => $companyOwner->id,
                 ]
             );

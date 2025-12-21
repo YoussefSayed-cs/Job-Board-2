@@ -46,7 +46,7 @@
                 <div class="flex space-x-2">
 
                     @php
-                        $active = "bg-indigo-700";
+                        $active = "bg-green-700";
                         $inactive = "bg-indigo-500";
                     @endphp
 
@@ -65,10 +65,10 @@
                         Hybrid
                     </a>
 
-                    <a href="{{ route('dashboard', ['filter' => 'Contract', 'search' => request('search')]) }}"
+                    <!-- <a href="{{ route('dashboard', ['filter' => 'Contract', 'search' => request('search')]) }}"
                         class="px-4 py-2 rounded-lg text-white {{ request('filter') == 'Contract' ? $active : $inactive }}">
                         Contract
-                    </a>
+                    </a> -->
 
                     @if(request('filter'))
                         <a href="{{ route('dashboard', ['search' => request('search')]) }}"

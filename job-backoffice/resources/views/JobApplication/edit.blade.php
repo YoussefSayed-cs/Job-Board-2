@@ -5,8 +5,8 @@
         </h2>
     </x-slot>
 
-    <div class="overflow-x-auto p-x">
-        <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-mid">
+    <div class="overflow-x-auto p-x p-8 m-4">
+        <div class="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-mid m-4">
             <form
                 action="{{ route('job-applications.update', ['job_application' => $job_application->id, 'redirectToList' => request()->query('redirectToList')]) }}"
                 method="post">

@@ -20,6 +20,7 @@ class company extends Model
         'name',
         'address',
         'industry',
+        'description',
         'website',
         'ownerID'
     ];

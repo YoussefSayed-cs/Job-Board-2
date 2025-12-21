@@ -10,7 +10,7 @@
 
         <x-toast-notification />
 
-        <div class="flex justify-end items-center space-x-4">
+        <div class="flex justify-end items-center space-x-4 m-3">
             @if (request()->has('archived') && request()->input('archived') == 'true')
 
                 <!-- Active -->
@@ -34,15 +34,15 @@
         <table class="min-w-full divide-y  divide-gray-200 rounded-lg shadow mt-4 bg-white ">
             <thead>
                 <tr>
-                    <th class="px-6 py-3 text-left text-md font-semibold text-black-700">Applicant Name</th>
-                    <th class="px-20 py-3 text-left text-md font-semibold text-black">Position (Job Vacancy)</th>
+                    <th class="px-6 py-3 text-left text-md font-semibold text-black-700">Applicant Name:</th>
+                    <th class="px-6 py-3 text-left text-md font-semibold text-black">Position (Job Vacancy):</th>
 
-                    @if (auth()->user()->role == 'company-owner')
-                      <th class="px-20 py-3 text-left text-md font-semibold text-black">Company</th>
+                    @if (auth()->user()->role == 'admin')
+                      <th class="px-20 py-3 text-left text-md font-semibold text-black">Company:</th>
                     @endif
                     
-                    <th class="px-6 py-3  text-left text-md font-semibold text-black">Status</th>
-                    <th class="px-6 py-3 text-left text-md font-semibold text-black">Actions</th>
+                    <th class="px-6 py-3  text-left text-md font-semibold text-black">Status:</th>
+                    <th class="px-6 py-3 text-left text-md font-semibold text-black">Actions:</th>
                 </tr>
             </thead>
 
@@ -54,7 +54,7 @@
                          <td class="px-6 py-4 text-gray-800 "> {{ $application->JobVacancy?->title ?? 'N/A' }} </td>
 
                          @if (auth()->user()->role == 'admin')
-                         <td class="px-6 py-4 text-gray-800 "> {{ $application->JobVacancy?->company?->name ?? 'N/A' }} </td>    
+                         <td class="px-6 py-3 text-gray-800 "> {{ $application->JobVacancy?->company?->name ?? 'N/A' }} </td>    
                          @endif
                          
                          <td class="px-6 py-4 @if($application->status == 'accepted') text-green-500 @elseif($application->status == 'rejected') text-red-500  @else text-yellow-500 @endif text-gray-800 "> {{ $application->status }} </td>

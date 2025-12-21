@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="overflow-x-auto p-x">
-        <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-mid">
+        <div class="max-w-7xl mx-auto p-7 m-10 bg-white rounded-lg shadow-mid">
             <form
                 action="{{ route('users.update', ['user' => $users->id, 'redirectToList' => request()->query('redirectToList')]) }}"
                 method="post">
@@ -39,12 +39,10 @@
 
 
                     <div class="mb-4">
-                        <label for="password" class="block text-sm font-medium text-gray-700">
-                            Change Owner Password </label>
-                        <div class="relative" x-data="{showPassword: false }">
-                            <x-text-input id="password" class="block mt-1 w-full" name="password"
-                                autocomplete="current-password" x-bind:type="showPassword ? 'text' : 'password'" />
-
+                        <label class="block text-sm font-medium text-gray-700">Change Owner Password</label>
+                        <div class="relative" x-data="{showPassword: false}">
+                            <input id="password" name="password" :type="showPassword ? 'text' : 'password'"
+                                class="block w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                             <button type="button" @click="showPassword = !showPassword"
                                 class="absolute inset-y-0 right-2 flex items-center text-gray-500">
                                 <!--Eye closed-->
@@ -74,16 +72,14 @@
 
                         </div>
 
-                        
-                              @error('password')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+
+                        @error('password')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
 
 
 
                     </div>
-
-
 
 
 

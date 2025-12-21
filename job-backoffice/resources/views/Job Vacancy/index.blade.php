@@ -6,7 +6,7 @@
     </x-slot>
 
 
-    <div class="overflow-x-auto p-30">
+    <div class="overflow-x-auto p-30 m-4">
 
         <x-toast-notification />
 

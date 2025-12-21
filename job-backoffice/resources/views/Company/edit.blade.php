@@ -18,8 +18,8 @@
         </h2>
     </x-slot>
 
-    <div class="overflow-x-auto p-x">
-        <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-mid">
+    <div class="overflow-x-auto p-x p-8 m-4">
+        <div class="max-w-7xl mx-auto p-3 m-3 bg-white rounded-lg shadow-mid">
             <form action="{{ $formAction }}" method="post">
                 @csrf
                 @method('PUT')
