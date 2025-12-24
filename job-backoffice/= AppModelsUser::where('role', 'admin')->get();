@@ -1,0 +1,15 @@
+[90m= [39m[34;4mApp\Models\job_vacancy[39;24m {#6555
+    [34mid[39m: "[32m019b40eb-d1d5-73dc-be5f-444e9fe26a31[39m",
+    [34mtitle[39m: "[32mSenior Frontend Developer[39m",
+    [34mdescription[39m: "[32mWe are seeking a talented Senior Frontend Developer to join our engineering team. You will be responsible for building responsive and interactive user interfaces using modern JavaScript frameworks. The ideal candidate should have strong experience with React.js, TypeScript, and a passion for creating exceptional user experiences.[39m",
+    [34mlocation[39m: "[32mSan Francisco, CA[39m",
+    [34msalary[39m: "[32m150000[39m",
+    [34mtype[39m: "[32mFull-Time[39m",
+    [34mcreated_at[39m: "[32m2025-12-21 12:39:15[39m",
+    [34mupdated_at[39m: "[32m2025-12-21 12:39:15[39m",
+    [34mdeleted_at[39m: [36mnull[39m,
+    [34mcompanyID[39m: "[32m019b40eb-c95d-73b1-b6aa-37d5b0d8e695[39m",
+    [34mcategoryID[39m: "[32m019b40eb-c693-701f-9e61-3ec206cb2311[39m",
+    [34mviews_count[39m: [35m0[39m,
+  }
+

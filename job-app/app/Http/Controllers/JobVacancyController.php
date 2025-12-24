@@ -8,7 +8,6 @@ use App\Http\Requests\AbblyJobRequest;
 use App\Models\resume;
 use App\Services\ResumesAnalysisServices;
 use Illuminate\Http\Request;
-
 class JobVacancyController extends Controller
 {
     protected $resumeService;
@@ -81,29 +80,27 @@ class JobVacancyController extends Controller
 
             $newResume = resume::create([
                 'filename' => $file->getClientOriginalName(),
-                'fileUri'  => $path,
-                'userID'   => auth()->id(),
+                'fileUri' => $path,
+                'userID' => auth()->id(),
                 'contactDetails' => json_encode([
-                    'name'  => auth()->user()->name,
+                    'name' => auth()->user()->name,
                     'email' => auth()->user()->email,
                 ]),
-                'summary'    => $extracted['summary'],
-                'skills'     => $extracted['skills'],
+                'summary' => $extracted['summary'],
+                'skills' => $extracted['skills'],
                 'experience' => $extracted['experience'],
-                'education'  => $extracted['education'],
+                'education' => $extracted['education'],
             ]);
 
             $resumeID = $newResume->id;
-        }
-
-        else {
+        } else {
             return back()->withErrors(['resume_option' => 'Choose a resume option']);
         }
 
         // AI EVALUATION
         $evaluation = $this->resumeService->analyzeResume($job_vacancy, $extracted);
 
-        job_application::create([
+        $application = job_application::create([
             'status' => 'pending',
             'aiGeneratedScore' => $evaluation['aiGeneratedScore'],
             'aiGeneratedFeedback' => $evaluation['aiGeneratedFeedback'],
@@ -112,6 +109,7 @@ class JobVacancyController extends Controller
             'userID' => auth()->id(),
         ]);
 
+        
         return redirect()
             ->route('job-applications.index')
             ->with('success', 'Application submitted successfully!');

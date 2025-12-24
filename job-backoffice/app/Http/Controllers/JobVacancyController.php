@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\company;
 use App\Models\job_category;
 use App\Models\job_vacancy;
  
 use Illuminate\Http\Request;
+use App\Notifications\JobApplicationSubmitted;
 use App\Http\Requests\JobVacancy\JobVacancyCreateRequest;
 use App\Http\Requests\JobVacancy\JobVacancyUpdateRequest;  
 
@@ -115,4 +117,7 @@ class JobVacancyController extends Controller
         $vacancy->restore();
         return redirect()->route('job-vacancies.index',['archived' => 'true'])->with('success', 'Job vacancy restored successfully.');
     }
+
+ 
+
 }

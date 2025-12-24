@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="overflow-x-auto p-x">
-        <div class="max-w-7xl mx-auto p-7 m-10 bg-white rounded-lg shadow-mid">
+        <div class="max-w-6xl mx-auto p-7 m-5 bg-white rounded-lg shadow-mid">
             <form
                 action="{{ route('users.update', ['user' => $users->id, 'redirectToList' => request()->query('redirectToList')]) }}"
                 method="post">

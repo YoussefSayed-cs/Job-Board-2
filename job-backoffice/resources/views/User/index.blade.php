@@ -8,6 +8,8 @@
 
     <div class="overflow-x-auto p-30">
 
+    
+
         <x-toast-notification />
 
         <div class="flex justify-end items-center space-x-4 mb-8 m-3">
@@ -29,6 +31,32 @@
 
             @endif
         </div>
+
+        {{-- Search --}}
+                <form action="{{ route('users.index') }}" method="GET" class="flex items-center w-1/3 space-x-2 m-4">
+
+                    <div class="flex w-full">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            class="w-full p-2 rounded-l-lg bg-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="Find user by name ">
+
+                        @if(request('filter'))
+                            <input type="hidden" name="filter" value="{{ request('filter') }}">
+                        @endif
+
+                        <button type="submit" class="bg-gray-500 text-white px-4 py-3 rounded-r-lg hover:bg-gray-600">
+                            Search
+                        </button>
+                    </div>
+
+                    @if(request('search'))
+                        <a href="{{ route('users.index', ['filter' => request('filter')]) }}"
+                            class="bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600">
+                            Clear
+                        </a>
+                    @endif
+
+                </form>
 
         <!-- JobApplications table-->
         <table class="min-w-full divide-y  divide-gray-200 rounded-lg shadow mt-4 bg-white ">
@@ -91,11 +119,6 @@
                 @endforelse
             </tbody>
         </table>
-
-
-
-
-
 
         <div class="mt-4">{{ $users->links() }}</div>
     </div>

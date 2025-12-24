@@ -7,14 +7,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ApplicationStatusNotification extends Notification
+class NewJobApplicationNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public $application)
+    public function __construct(public string $message , public string $url)
     {
         //
     }
@@ -48,16 +48,9 @@ class ApplicationStatusNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'title' => 'New Job Application',
+            'message' => 'A new applicant applied to your job',
             //
-        ];
-    }
-
-     public function toDatabase(object $notifiable)
-    {
-        return [
-            'type' => 'application_status',
-            'message' => 'Your application status is now: '
-                         . $this->application->status,
         ];
     }
 }

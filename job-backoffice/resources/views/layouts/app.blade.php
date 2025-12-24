@@ -12,34 +12,40 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
-<body class="font-sans antialiased">
-    <div class="flex">
+<body class="font-sans antialiased bg-gray-100">
+    <div class="flex min-h-screen">
+
         <!-- Sidebar -->
         @include('layouts.navigation')
 
         <!-- Main Content -->
-        <div class="flex-1 min-h-screen bg-gray-100">
-            <!-- Page Heading -->
+        <div class="flex-1 flex flex-col">
+
+            <!-- Header -->
             @isset($header)
-                <header class="bg-white shadow w-full">
-                    <div class="w-full py-4 px-4">
+                <header class="bg-white shadow">
+                    <div class="px-6 py-4">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
-
             <!-- Page Content -->
-            <main>
+            <main class="flex-1 p-6">
                 {{ $slot }}
             </main>
+
         </div>
     </div>
 </body>
-
 </html>

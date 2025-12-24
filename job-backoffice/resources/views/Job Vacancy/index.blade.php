@@ -62,7 +62,7 @@
                                 {{ $vacancy->title }}</a></td>
 
                         @if (auth()->user()->role == 'admin')
-                        <td class="px-6 py-4 text-gray-800 "> {{ $vacancy->company->name }} </td>
+                        <td class="px-6 py-4 text-gray-800 "> {{ $vacancy->company->name ?? 'N/A' }} </td>
                         @endif
                         
                         <td class="px-6 py-4 text-gray-800 "> {{ $vacancy->location }} </td>

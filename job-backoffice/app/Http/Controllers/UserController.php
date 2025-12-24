@@ -16,6 +16,16 @@ class UserController extends Controller
     {
         $query =User::latest();
 
+
+    $search = $request->search;
+     if ($search) {
+    $query->where(function ($q) use ($search) {
+        $q->where('name', 'like', "%$search%")
+          ->orWhere('email', 'like', "%$search%");
+    });
+    }
+
+
         if( $request->input('archived') == 'true' )
         {
             $query->onlyTrashed();

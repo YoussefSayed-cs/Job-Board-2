@@ -203,5 +203,6 @@ class CompanyController extends Controller
     }
       return company::where('ownerID' , auth()->user()->id)->first();
     }
-    
+
+
 }
