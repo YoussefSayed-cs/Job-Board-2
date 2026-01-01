@@ -4,37 +4,54 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use OpenAI\Laravel\Facades\OpenAI;
+use Illuminate\Support\Facades\Http;
 use Spatie\PdfToText\Pdf;
 
 class ResumesAnalysisServices
 {
-    public function extractResumeInformation(string $fileUri)
+    /**
+     * Extract resume structured data from PDF using DeepSeek
+     */
+    public function extractResumeInformation(string $fileUri): array
     {
         try {
-            $rawtext = $this->extractTextFromPdf($fileUri);
+            // 1️⃣ PDF → Text
+            $rawText = $this->extractTextFromPdf($fileUri);
 
-            $response = OpenAI::chat()->create([
-                'model' => 'gpt-4o',
+            // 2️⃣ Call DeepSeek
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.deepseek.key'),
+                'Content-Type'  => 'application/json',
+            ])->post(config('services.deepseek.url'), [
+                'model' => 'deepseek-chat',
                 'messages' => [
                     [
                         'role' => 'system',
                         'content' =>
-                            'Extract JSON with keys: summary, skills, experience, education.'
+                            'Extract resume info and return ONLY valid JSON with keys:
+                             summary, skills, experience, education.'
                     ],
                     [
                         'role' => 'user',
-                        'content' => $rawtext
+                        'content' => $rawText
                     ]
                 ],
-                'response_format' => ['type' => 'json_object'],
                 'temperature' => 0.1
             ]);
 
-            return json_decode($response->choices[0]->message->content, true);
+            if (!$response->successful()) {
+                throw new \Exception($response->body());
+            }
 
-        } catch (\Exception $e) {
+            return json_decode(
+                $response->json('choices.0.message.content'),
+                true
+            );
+
+        } catch (\Throwable $e) {
             Log::error('Resume extraction error: ' . $e->getMessage());
+
+            // AI اختياري → ميفشلش الـ apply
             return [
                 'summary' => '',
                 'skills' => '',
@@ -44,6 +61,9 @@ class ResumesAnalysisServices
         }
     }
 
+    /**
+     * Analyze resume vs job vacancy using DeepSeek
+     */
     public function analyzeResume($job_vacancy, $resumeData): array
     {
         try {
@@ -55,50 +75,64 @@ class ResumesAnalysisServices
                 'salary' => $job_vacancy->salary,
             ];
 
-            $response = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.deepseek.key'),
+                'Content-Type'  => 'application/json',
+            ])->post(config('services.deepseek.url'), [
+                'model' => 'deepseek-chat',
                 'messages' => [
                     [
                         'role' => 'system',
                         'content' =>
-                            "Return ONLY JSON with: aiGeneratedScore, aiGeneratedFeedback."
+                            'Return ONLY valid JSON with:
+                             aiGeneratedScore (0-100),
+                             aiGeneratedFeedback (string).'
                     ],
                     [
                         'role' => 'user',
-                        'content' =>
-                            json_encode(['job' => $jobDetails, 'resume' => $resumeData])
+                        'content' => json_encode([
+                            'job' => $jobDetails,
+                            'resume' => $resumeData
+                        ])
                     ]
                 ],
-                'response_format' => ['type' => 'json_object'],
             ]);
 
-            return json_decode($response->choices[0]->message->content, true);
+            if (!$response->successful()) {
+                throw new \Exception($response->body());
+            }
 
-        } catch (\Exception $e) {
+            return json_decode(
+                $response->json('choices.0.message.content'),
+                true
+            );
+
+        } catch (\Throwable $e) {
             Log::error('Resume analysis error: ' . $e->getMessage());
 
             return [
                 'aiGeneratedScore' => 0,
                 'aiGeneratedFeedback' =>
-                    'An error occurred while analyzing the resume.',
+                'AI service unavailable. Please try later.',
             ];
         }
     }
 
+    /**
+     * Extract raw text from PDF
+     */
     private function extractTextFromPdf(string $fileUri): string
     {
-        if (!Storage::disk('local')->exists($fileUri)) {
+        if (!Storage::disk('cloud')->exists($fileUri)) {
             throw new \Exception("File not found at: $fileUri");
         }
 
-        $fileContent = Storage::disk('local')->get($fileUri);
+        $fileContent = Storage::disk('cloud')->get($fileUri);
 
         $tempFile = tempnam(sys_get_temp_dir(), 'pdf_');
         file_put_contents($tempFile, $fileContent);
 
-        $pdf = new Pdf();
-        $pdf->setPdf($tempFile);
-        $text = $pdf->text();
+        $text = Pdf::getText($tempFile);
 
         unlink($tempFile);
 

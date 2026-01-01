@@ -14,8 +14,17 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::delete('/notifications/{id}', function ($id) {
+        auth()->user()
+            ->notifications()
+            ->where('id', $id)
+            ->delete();
+
+        return back();
+    })->name('notifications.delete');
+
     // Mark notification as read
-    
+
     // Job Applications
     Route::resource('job-applications', applicationController::class);
     Route::put('/job-applications/{id}/restore', [applicationController::class, 'restore'])->name('job-applications.restore');
@@ -26,17 +35,16 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
 
     Route::post('/api/job-applications/notify', function (Request $request) {
 
-    $application = job_application::findOrFail($request->applicationID);
-    $job = $application->jobVacancy;
+        $application = job_application::findOrFail($request->applicationID);
+        $job = $application->jobVacancy;
 
-    $owner = $job->company->owner;
+        $owner = $job->company->owner;
 
-    $owner->notify(
-        new NewJobApplicationNotification($job, $application)
-    );
+      
 
-    return response()->json(['status' => 'ok']);
-});
+
+        return response()->json(['status' => 'ok']);
+    });
 
 });
 
@@ -59,4 +67,4 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/job-categories/{id}/restore', [categoryController::class, 'restore'])->name('job-categories.restore');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AbblyJobRequest;
 use App\Models\job_application;
 use App\Models\job_vacancy;
-use App\Http\Requests\AbblyJobRequest;
 use App\Models\resume;
+use App\Models\User;
+use App\Notifications\newJobApply;
 use App\Services\ResumesAnalysisServices;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 class JobVacancyController extends Controller
 {
-    protected $resumeService;
+    protected ResumesAnalysisServices $resumeService;
 
     public function __construct(ResumesAnalysisServices $resumeService)
     {
@@ -27,16 +30,29 @@ class JobVacancyController extends Controller
     {
         $job_vacancy = job_vacancy::findOrFail($id);
         $resumes = auth()->user()->resume;
+
         return view('job-vacancies.apply', compact('job_vacancy', 'resumes'));
     }
 
     public function processApplications(AbblyJobRequest $request, string $id)
     {
         $job_vacancy = job_vacancy::findOrFail($id);
-        $resumeID = null;
-        $extracted = [];
 
-        // EXISTING RESUME
+        $resumeID = null;
+
+        // ✅ default structure (مهم جدًا)
+        $extracted = [
+            'summary' => '',
+            'skills' => '',
+            'experience' => '',
+            'education' => '',
+        ];
+
+        /*
+        |------------------------------------------------------------------
+        | EXISTING RESUME
+        |------------------------------------------------------------------
+        */
         if (str_starts_with($request->resume_option, 'existing_')) {
 
             $existingId = str_replace('existing_', '', $request->resume_option);
@@ -51,34 +67,33 @@ class JobVacancyController extends Controller
 
             $resumeID = $resume->id;
 
-            // extract existing resume data for AI evaluation
             $extracted = [
-                'summary' => $resume->summary,
-                'skills' => $resume->skills,
-                'experience' => $resume->experience,
-                'education' => $resume->education,
+                'summary' => $resume->summary ?? '',
+                'skills' => $resume->skills ?? '',
+                'experience' => $resume->experience ?? '',
+                'education' => $resume->education ?? '',
             ];
         }
 
-        // NEW RESUME
+        /*
+        |------------------------------------------------------------------
+        | NEW RESUME
+        |------------------------------------------------------------------
+        */
         elseif ($request->resume_option === 'new_resume') {
 
-            if (!$request->hasFile('resume_file')) {
-                return back()->withErrors(['resume_file' => 'Please upload a PDF']);
-            }
-
             $file = $request->file('resume_file');
-            if ($file->getClientOriginalExtension() !== 'pdf') {
-                return back()->withErrors(['resume_file' => 'Only PDF files allowed']);
+            $fileName = 'resume_' . time() . '.pdf';
+            $path = $file->storeAs('resume', $fileName, 'cloud');
+
+            // ✅ AI extraction (safe)
+            try {
+                $extracted = $this->resumeService->extractResumeInformation($path);
+            } catch (\Throwable $e) {
+                Log::warning('AI extraction skipped: ' . $e->getMessage());
             }
 
-            $fileName = 'resume_' . time() . '.pdf';
-            $path = $file->storeAs('resume', $fileName);
-
-            // Extract AI Data
-            $extracted = $this->resumeService->extractResumeInformation($path);
-
-            $newResume = resume::create([
+            $resume = resume::create([
                 'filename' => $file->getClientOriginalName(),
                 'fileUri' => $path,
                 'userID' => auth()->id(),
@@ -86,30 +101,66 @@ class JobVacancyController extends Controller
                     'name' => auth()->user()->name,
                     'email' => auth()->user()->email,
                 ]),
-                'summary' => $extracted['summary'],
-                'skills' => $extracted['skills'],
-                'experience' => $extracted['experience'],
-                'education' => $extracted['education'],
+                'summary' => $extracted['summary'] ?? '',
+                'skills' => $extracted['skills'] ?? '',
+                'experience' => $extracted['experience'] ?? '',
+                'education' => $extracted['education'] ?? '',
             ]);
 
-            $resumeID = $newResume->id;
-        } else {
+            $resumeID = $resume->id;
+        }
+
+        else {
             return back()->withErrors(['resume_option' => 'Choose a resume option']);
         }
 
-        // AI EVALUATION
-        $evaluation = $this->resumeService->analyzeResume($job_vacancy, $extracted);
+        /*
+        |------------------------------------------------------------------
+        | AI EVALUATION (OPTIONAL)
+        |------------------------------------------------------------------
+        */
+        try {
+            $evaluation = $this->resumeService->analyzeResume($job_vacancy, $extracted);
+        } catch (\Throwable $e) {
+            Log::warning('AI evaluation skipped: ' . $e->getMessage());
+
+            $evaluation = [
+                'aiGeneratedScore' => 0,
+                'aiGeneratedFeedback' =>
+                    'AI evaluation is temporarily unavailable.',
+            ];
+        }
 
         $application = job_application::create([
             'status' => 'pending',
-            'aiGeneratedScore' => $evaluation['aiGeneratedScore'],
-            'aiGeneratedFeedback' => $evaluation['aiGeneratedFeedback'],
-            'jobVacancyID' => $id,
+            'aiGeneratedScore' => $evaluation['aiGeneratedScore'] ?? 0,
+            'aiGeneratedFeedback' =>
+                $evaluation['aiGeneratedFeedback'] ?? 'No AI feedback',
+            'jobVacancyID' => $job_vacancy->id,
             'resumeID' => $resumeID,
             'userID' => auth()->id(),
         ]);
 
-        
+        /*
+        |------------------------------------------------------------------
+        | NOTIFICATIONS
+        |------------------------------------------------------------------
+        */
+        $notification = new newJobApply(
+            auth()->user(),
+            $job_vacancy,
+            $application,
+            $application->id
+        );
+
+        // Company owner
+        $job_vacancy->company->Owner->notify($notification);
+
+        // Admins
+        User::where('role', 'admin')->each(
+            fn ($admin) => $admin->notify($notification)
+        );
+
         return redirect()
             ->route('job-applications.index')
             ->with('success', 'Application submitted successfully!');

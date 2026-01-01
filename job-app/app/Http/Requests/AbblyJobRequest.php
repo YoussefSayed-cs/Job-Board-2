@@ -20,19 +20,22 @@ class AbblyJobRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-        return [
-            'resume_option'=>'required|string',
-            'resume_file' => 'required_if:resume_option,new_resume|file|mimes:pdf|max:5120',
-        ];
-    }
-
+{
+    return [
+        'resume_option' => 'required|string',
+        'resume_file' => 'required_if:resume_option,new_resume|file|mimes:pdf|max:5120',
+    ];
+}
     public function messages(): array
-    {
-        return [
-            'resume_option.required' =>'Please select a resume option.',
-            'resume_file.required' => 'The resume file is required.',
-            'resume_file.file' => 'The resume file must be a file.',
-        ];
-    }
+{
+    return [
+        'resume_option.required' => 'Please select a resume option.',
+
+        'resume_file.required_if' => 'Please upload your resume when choosing a new resume.',
+        'resume_file.file' => 'The resume must be a valid file.',
+        'resume_file.mimes' => 'Only PDF files are allowed.',
+        'resume_file.max' => 'The resume size must not exceed 5MB.',
+    ];
+}
+
 }

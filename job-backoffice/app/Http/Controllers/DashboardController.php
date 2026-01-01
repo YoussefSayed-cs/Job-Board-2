@@ -11,13 +11,24 @@ class DashboardController extends Controller
 {
   public function index()
   {
-    if (auth()->user()->role == 'admin') {
-      $analytics = $this->adminDashboard();
+     $user = auth()->user();
+
+    if ($user->role == 'admin') {
+        $analytics = $this->adminDashboard();
     } else {
-      $analytics = $this->companyOwnerDashboard();
+        $analytics = $this->companyOwnerDashboard();
     }
 
-    return view('Dashboard.index', compact(['analytics']));
+    $notifications = auth()->user()->notifications()->latest()->take(5)->get();
+
+    $unreadCount = auth()->user()->unreadNotifications()->count();
+
+    return view('Dashboard.index', compact(
+        'analytics',
+        'notifications',
+                   'unreadCount',
+                   
+    ));
   }
 
   private function adminDashboard()

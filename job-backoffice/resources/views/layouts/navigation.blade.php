@@ -1,4 +1,4 @@
-<nav class="w-64 bg-gray-50 h-screen border-r border-gray-200 shadow-lg flex flex-col">
+<nav class="w-64 bg-gray-50 h-100 border-r border-gray-200 shadow-lg flex flex-col">
     <!-- Logo -->
     <div class="flex items-center px-6 py-5 border-b border-gray-200">
         <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
