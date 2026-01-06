@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl;
+    }
+
+    .btn-primary {
+        @apply px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-all duration-300 shadow-lg hover:shadow-brand-500/30 active:scale-95;
+    }
+
+    .btn-secondary {
+        @apply px-4 py-2 bg-white text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md;
+    }
+}

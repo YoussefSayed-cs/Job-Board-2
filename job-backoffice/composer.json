@@ -17,10 +17,10 @@
 ],
     "require": {
         "php": ">=8.2",
+        "job/shared": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "job/shared":"*"
-        
+        "pusher/pusher-php-server": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

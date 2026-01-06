@@ -19,16 +19,7 @@ class DashboardController extends Controller
         $analytics = $this->companyOwnerDashboard();
     }
 
-    $notifications = auth()->user()->notifications()->latest()->take(5)->get();
-
-    $unreadCount = auth()->user()->unreadNotifications()->count();
-
-    return view('Dashboard.index', compact(
-        'analytics',
-        'notifications',
-                   'unreadCount',
-                   
-    ));
+    return view('Dashboard.index', compact('analytics'));
   }
 
   private function adminDashboard()
@@ -88,6 +79,16 @@ class DashboardController extends Controller
   {
     $company = auth()->user()->company;
 
+    if (!$company) {
+        return [
+            'activeUsers' => 0,
+            'totalJob' => 0,
+            'totalapplications' => 0,
+            'mostAppliedJobs' => collect(), // return empty collection
+            'conversionRates' => collect()
+        ];
+    }
+
     // filter active users by applying to jobs of the company
     $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))
       ->where('role', 'job-seeker')
@@ -116,7 +117,7 @@ class DashboardController extends Controller
       ->orderByDesc('totalCount')
       ->get()
       ->map(function ($job) {
-        // تأكد من أن اسم العمود صحيح
+        // Ensure column name is correct
         $views = $job->views ?? $job->view_count ?? $job->views_count ?? 0;
         
         if ($views > 0) {

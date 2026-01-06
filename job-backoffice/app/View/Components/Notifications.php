@@ -8,12 +8,21 @@ use Illuminate\View\Component;
 
 class Notifications extends Component
 {
+    public $notifications;
+    public $unreadCount;
+
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        //
+        if (auth()->check()) {
+            $this->notifications = auth()->user()->notifications()->latest()->take(5)->get();
+            $this->unreadCount = auth()->user()->unreadNotifications()->count();
+        } else {
+            $this->notifications = collect();
+            $this->unreadCount = 0;
+        }
     }
 
     /**

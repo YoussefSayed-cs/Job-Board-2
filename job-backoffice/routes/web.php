@@ -24,6 +24,15 @@ Route::middleware(['auth', 'role:admin,company-owner'])->group(function () {
     })->name('notifications.delete');
 
     // Mark notification as read
+    Route::post('/notifications/{id}/read', function ($id) {
+        $notification = auth()->user()->notifications()->where('id', $id)->first();
+        
+        if ($notification && !$notification->read_at) {
+            $notification->markAsRead();
+        }
+
+        return response()->json(['success' => true]);
+    })->name('notifications.read');
 
     // Job Applications
     Route::resource('job-applications', applicationController::class);
